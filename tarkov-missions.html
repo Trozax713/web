@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarkov Random Mission Generator</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #d0d0d0;
+            --accent-color: #9a8866;
+            --container-bg: #222222;
+            --button-color: #9a8866;
+            --button-hover: #bcaa7e;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 0px 0px 10px rgba(154, 136, 102, 0.3);
+        }
+        
+        .options {
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .option-title {
+            width: 100%;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        
+        .checkbox-container {
+            margin-right: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-container input {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        
+        button {
+            background-color: var(--button-color);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: background-color 0.2s ease;
+        }
+        
+        button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .mission-container {
+            display: none;
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mission-title {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .location {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 3px solid var(--accent-color);
+            background-color: rgba(154, 136, 102, 0.1);
+        }
+        
+        .location-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .zones-title {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+        
+        .zone {
+            margin-left: 15px;
+            padding: 5px;
+        }
+        
+        .path-arrow {
+            display: block;
+            text-align: center;
+            font-size: 24px;
+            margin: 15px 0;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tarkov Random Mission Generator</h1>
+        
+        <div class="options">
+            <div class="option-group">
+                <div class="option-title">Mission Length</div>
+                <div class="checkbox-container">
+                    <input type="radio" id="length1" name="missionLength" value="1" checked>
+                    <label for="length1">1 Location</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="radio" id="length2" name="missionLength" value="2">
+                    <label for="length2">2 Locations</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="radio" id="length3" name="missionLength" value="3">
+                    <label for="length3">3 Locations</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="radio" id="lengthRandom" name="missionLength" value="random">
+                    <label for="lengthRandom">Random</label>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="includeLabs">
+                    <label for="includeLabs">Include Labs</label>
+                </div>
+            </div>
+            
+            <button id="generateBtn">Generate Mission</button>
+        </div>
+        
+        <div id="missionContainer" class="mission-container">
+            <div class="mission-title">Your Mission</div>
+            <div id="missionPath"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data from the uploaded files
+        const locations = {
+            1: "Ground Zero",
+            2: "Streets of Tarkov",
+            3: "Interchange",
+            4: "Customs",
+            5: "Factory",
+            6: "Woods",
+            7: "Reserve",
+            8: "Lighthouse",
+            9: "Shoreline",
+            10: "The Lab"
+        };
+        
+        // Valid transits between locations
+        const validTransits = [
+            [1, 2], [2, 1], [2, 3], [3, 2], [2, 10], [10, 2],
+            [3, 4], [4, 3], [4, 9], [4, 5], [5, 4], [4, 7], 
+            [7, 4], [5, 10], [5, 6], [6, 5], [6, 4], [6, 7], 
+            [7, 6], [6, 8], [8, 6], [8, 7], [7, 8], [8, 9], [9, 8]
+        ];
+        
+        // Actual zones to clear from the provided data file
+        const zonesToClear = {
+            1: [
+                "Terragroup Building",
+                "Underground",
+                "Tarbank Building (Empire)",
+                "Nakitani Building",
+                "Central Insight Building",
+                "Fusion Building (Restaurant Complex)",
+                "Skyside Building (Cafe Complex)"
+            ],
+            2: [
+                "The Mall",
+                "The Pinewood Block",
+                "The Cinema Block",
+                "The Construction Site",
+                "Concordia (Tennis Court Complex)",
+                "The Factory Block",
+                "Zmejskij Alley Block",
+                "Cardinal Block",
+                "Lexos Dealership"
+            ],
+            3: [
+                "Highway",
+                "Power Station",
+                "Parking Garage - A and B",
+                "Parking Garage - C and D",
+                "IDEA",
+                "GOSHAN",
+                "OLI",
+                "First Floor - IDEA Side",
+                "First Floor - OLI Side",
+                "Second Floor - IDEA Side",
+                "Second Floor - OLI Side",
+                "Rear Loading Docks (all of them)"
+            ],
+            4: [
+                "Storage Units",
+                "Big Red Complex",
+                "Dorms",
+                "New Gas Station and Military Checkpoint",
+                "Fortress and Silos",
+                "Warehouse 17",
+                "Boiler Room",
+                "Methlab and Surrounding Area",
+                "Craneyard and Surrounding Warehouses",
+                "Factory Complex (Oil Tanks)"
+            ],
+            5: [
+                "Office Half",
+                "Med Lab Half (opposite of offices)"
+            ],
+            6: [
+                "Sawmill",
+                "Med Camp",
+                "USEC Camp",
+                "Scav House, Hunting Cabin, Checkpoint",
+                "Village and Old Sawmill",
+                "Abandoned Village",
+                "Antenna (Scav Bunker)",
+                "Mountain Pass and Plane Crash"
+            ],
+            7: [
+                "Pawn Buildings and the Chopper",
+                "Bishop Buildings and White King",
+                "White Rook (Train Station)",
+                "Trainyard Warehouses",
+                "Heatpipe Complex",
+                "Knight Complex (Motorpool)",
+                "Command Bunker",
+                "Underground Storage Bunkers"
+            ],
+            8: [
+                "USEC Chalet",
+                "Blue Chalet",
+                "Upper Village",
+                "Sunken Village",
+                "Construction Site and Seaside Cottages",
+                "Shore Ruins (Landing and Cabin)",
+                "Treatment Plant - Building 1 (Shore Side)",
+                "Treatment Plant - Building 2 (Trainyard Side)",
+                "Treatment Plant - Building 3 (Mountain Side)",
+                "Trainyard"
+            ],
+            9: [
+                "Villages",
+                "Scav Island",
+                "Cottages",
+                "Bus Station",
+                "Power Station",
+                "Gas Station and Pier",
+                "Weather Station",
+                "Smugglers Camp",
+                "Resort West Wing (Swamp Side)",
+                "Resort East Wing (Smuggler Camp Side)",
+                "Admin Wing (Central Wing)",
+                "Blue Fenced Construction Area"
+            ],
+            10: [
+                "Survive",
+                "Extract Alive" // Added a second placeholder as mentioned
+            ]
+        };
+        
+        // Utility function to get random item from array
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        
+        // Function to get random zones for a location
+        function getRandomZones(locationId, count = 2) {
+            if (!zonesToClear[locationId] || zonesToClear[locationId].length === 0) {
+                return ["No zones available"];
+            }
+            
+            const zones = [...zonesToClear[locationId]];
+            const result = [];
+            
+            // Ensure we don't try to get more zones than available
+            const actualCount = Math.min(count, zones.length);
+            
+            for (let i = 0; i < actualCount; i++) {
+                const randomIndex = Math.floor(Math.random() * zones.length);
+                result.push(zones[randomIndex]);
+                zones.splice(randomIndex, 1);
+            }
+            
+            return result;
+        }
+        
+        // Function to get available destinations from a location
+        function getAvailableDestinations(locationId, includeLabs = false) {
+            const destinations = validTransits
+                .filter(transit => transit[0] === locationId)
+                .map(transit => transit[1]);
+            
+            if (!includeLabs) {
+                return destinations.filter(dest => dest !== 10);
+            }
+            
+            return destinations;
+        }
+        
+        // Function to generate a random path
+        function generatePath(length, includeLabs = false) {
+            // Filter out Labs if not included
+            let availableLocations = Object.keys(locations).map(Number);
+            if (!includeLabs) {
+                availableLocations = availableLocations.filter(loc => loc !== 10);
+            }
+            
+            // Start with a random location
+            const path = [getRandomItem(availableLocations)];
+            
+            // Add more locations based on valid transits
+            for (let i = 1; i < length; i++) {
+                const currentLocation = path[i - 1];
+                const destinations = getAvailableDestinations(currentLocation, includeLabs);
+                
+                // If no destinations are available, break
+                if (destinations.length === 0) {
+                    break;
+                }
+                
+                // Select a destination that's not already in the path if possible
+                const availableDestinations = destinations.filter(dest => !path.includes(dest));
+                
+                if (availableDestinations.length > 0) {
+                    path.push(getRandomItem(availableDestinations));
+                } else {
+                    // If all destinations are already visited, just pick any
+                    path.push(getRandomItem(destinations));
+                }
+            }
+            
+            return path;
+        }
+        
+        // Function to generate the mission
+        function generateMission() {
+            const missionLengthValue = document.querySelector('input[name="missionLength"]:checked').value;
+            const includeLabs = document.getElementById('includeLabs').checked;
+            
+            let missionLength;
+            if (missionLengthValue === 'random') {
+                missionLength = Math.floor(Math.random() * 3) + 1; // Random length between 1-3
+            } else {
+                missionLength = parseInt(missionLengthValue);
+            }
+            
+            const path = generatePath(missionLength, includeLabs);
+            
+            // Display the mission
+            displayMission(path);
+        }
+        
+        // Function to display the mission
+        function displayMission(path) {
+            const missionContainer = document.getElementById('missionContainer');
+            const missionPath = document.getElementById('missionPath');
+            
+            // Clear previous mission
+            missionPath.innerHTML = '';
+            
+            // Create HTML for each location in the path
+            path.forEach((locationId, index) => {
+                const locationName = locations[locationId];
+                const zones = getRandomZones(locationId);
+                
+                const locationElement = document.createElement('div');
+                locationElement.className = 'location';
+                
+                locationElement.innerHTML = `
+                    <div class="location-name">${index + 1}. ${locationName}</div>
+                    <div class="zones-title">Zones to Clear:</div>
+                    ${zones.map(zone => `<div class="zone">• ${zone}</div>`).join('')}
+                `;
+                
+                missionPath.appendChild(locationElement);
+                
+                // Add arrow between locations
+                if (index < path.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'path-arrow';
+                    arrow.textContent = '↓';
+                    missionPath.appendChild(arrow);
+                }
+            });
+            
+            // Show the mission container
+            missionContainer.style.display = 'block';
+        }
+        
+        // Event listener for the generate button
+        document.getElementById('generateBtn').addEventListener('click', generateMission);
+    </script>
+</body>
+</html>

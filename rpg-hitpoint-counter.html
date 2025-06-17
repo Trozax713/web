@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Creature Hit Point Tracker</title>
+    <style>
+      body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .controls {
+        text-align: center;
+        margin: 20px;
+        padding: 20px;
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      input[type="number"], input[type="text"] {
+        background-color: #3d3d3d;
+        border: 1px solid #505050;
+        color: white;
+        padding: 8px;
+        border-radius: 4px;
+        margin-right: 10px;
+        text-align: center;
+      }
+
+      button {
+        background-color: #4a5568;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #2d3748;
+      }
+
+      #tileContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .creature-tile {
+        background-color: #2d2d2d;
+        border: 2px solid #ef4444 !important;
+        border-radius: 8px;
+        padding: 20px;
+        width: 300px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        text-align: center;
+        position: relative;
+      }
+
+      .creature-tile.friendly {
+        border-color: #06b6d4 !important;
+      }
+
+      .border-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        padding: 0;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ef4444;
+      }
+
+      .border-toggle.friendly {
+        background-color: #06b6d4;
+      }
+
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 15px;
+      }
+
+      .number-row {
+        display: flex;
+        gap: 2px;
+        justify-content: center;
+        margin-bottom: 4px;
+        width: 100%;
+      }
+
+      .number-button {
+        flex: 0 0 28px;
+        min-width: 0;
+        padding: 4px 2px;
+        font-size: 0.85rem;
+      }
+
+      .toggle-button {
+        background-color: #48bb78;
+        min-width: 28px;
+        padding: 4px 2px;
+        font-size: 0.85rem;
+      }
+
+      .toggle-button.subtract {
+        background-color: #ef4444;
+      }
+
+      .set-hp {
+        background-color: #48bb78;
+        margin-top: 8px;
+      }
+
+      .set-hp:hover {
+        background-color: #38a169;
+      }
+
+      .tile-content {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <input id="numCreatures" type="number" placeholder="Number of Creatures" min="1" />
+      <button id="createTiles">Create Tiles</button>
+    </div>
+
+    <div id="tileContainer"></div>
+
+    <template id="tileTemplate">
+      <div class="creature-tile">
+        <div class="tile-content">
+          <h3>#1</h3>
+          <button class="border-toggle">⚔️</button>
+          <input type="text" class="creature-name" placeholder="Enter name" />
+          <p>
+            Max Hit Points:
+            <input class="js-max" placeholder="Max HP" type="number" />
+            <button class="set-hp">Set Starting HP</button>
+          </p>
+          <p class="curHitPoints">Current Hit Points: 0</p>
+          <p class="js-injury-status">Injury Status: Unknown</p>
+          <div class="button-group">
+            <div class="number-row">
+              <button class="toggle-button subtract" data-action="toggle">-</button>
+              <button class="number-button modify" data-modifier="1">1</button>
+              <button class="number-button modify" data-modifier="2">2</button>
+              <button class="number-button modify" data-modifier="3">3</button>
+              <button class="number-button modify" data-modifier="4">4</button>
+              <button class="number-button modify" data-modifier="5">5</button>
+              <button class="number-button modify" data-modifier="6">6</button>
+              <button class="number-button modify" data-modifier="7">7</button>
+              <button class="number-button modify" data-modifier="8">8</button>
+              <button class="number-button modify" data-modifier="9">9</button>
+            </div>
+            <div class="number-row">
+              <button class="number-button modify" data-modifier="10">10</button>
+              <button class="number-button modify" data-modifier="20">20</button>
+              <button class="number-button modify" data-modifier="30">30</button>
+              <button class="number-button modify" data-modifier="40">40</button>
+              <button class="number-button modify" data-modifier="50">50</button>
+              <button class="number-button modify" data-modifier="60">60</button>
+              <button class="number-button modify" data-modifier="70">70</button>
+              <button class="number-button modify" data-modifier="80">80</button>
+              <button class="number-button modify" data-modifier="90">90</button>
+              <button class="number-button modify" data-modifier="100">100</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      function getHealthColor(status) {
+        const colors = {
+          'Still Fresh': 'rgba(34, 197, 94, 0.35)',
+          'Getting Worn Down': 'rgba(132, 204, 22, 0.35)',
+          'Bloodied': 'rgba(234, 179, 8, 0.35)',
+          'Seriously Hurt': 'rgba(249, 115, 22, 0.35)',
+          'Grievously Wounded': 'rgba(239, 68, 68, 0.35)',
+          'Unconscious or Dead': 'rgba(0, 0, 0, 0.35)'
+        };
+        return colors[status] || '#2d2d2d';
+      }
+
+      document.getElementById("createTiles").addEventListener("click", function () {
+        const numCreatures = Number(document.getElementById("numCreatures").value);
+        const container = document.getElementById("tileContainer");
+        container.innerHTML = "";
+
+        for (let i = 0; i < numCreatures; i++) {
+          const template = document.getElementById("tileTemplate");
+          const clone = template.content.cloneNode(true);
+          
+          // Set the tile number
+          const title = clone.querySelector("h3");
+          title.textContent = "#" + (i + 1);
+
+          const tile = clone.querySelector(".creature-tile");
+          const setHpButton = tile.querySelector(".set-hp");
+          const maxInput = tile.querySelector(".js-max");
+          const curHitPointsDisplay = tile.querySelector(".curHitPoints");
+          const injuryStatusDisplay = tile.querySelector(".js-injury-status");
+          const toggleButton = tile.querySelector(".toggle-button");
+          const borderToggle = tile.querySelector(".border-toggle");
+          let isAddition = false;
+
+          borderToggle.addEventListener("click", function() {
+            tile.classList.toggle("friendly");
+            this.classList.toggle("friendly");
+          });
+
+          toggleButton.addEventListener("click", function() {
+            isAddition = !isAddition;
+            this.textContent = isAddition ? "+" : "-";
+            this.classList.toggle("subtract", !isAddition);
+          });
+
+          setHpButton.addEventListener("click", function () {
+            const startingHP = Number(maxInput.value);
+            curHitPointsDisplay.innerText = "Current Hit Points: " + startingHP;
+            updateInjuryStatus(startingHP, Number(maxInput.value), injuryStatusDisplay, tile);
+          });
+
+          const modifyButtons = tile.querySelectorAll(".modify");
+          modifyButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+              let modifier = Number(button.getAttribute("data-modifier"));
+              if (!isAddition) modifier = -modifier;
+              
+              let currentHP = Number(
+                curHitPointsDisplay.innerText.replace("Current Hit Points: ", "")
+              );
+              currentHP += modifier;
+              curHitPointsDisplay.innerText = "Current Hit Points: " + currentHP;
+              updateInjuryStatus(currentHP, Number(maxInput.value), injuryStatusDisplay, tile);
+            });
+          });
+
+          container.appendChild(clone);
+        }
+      });
+
+      function updateInjuryStatus(currentHP, maxHP, statusElement, tileElement) {
+        if (!maxHP) {
+          statusElement.innerText = "Injury Status: Set Max HP first";
+          return;
+        }
+        const ratio = Math.round((currentHP / maxHP) * 100);
+        let status;
+        if (ratio >= 80) status = "Still Fresh";
+        else if (ratio >= 60) status = "Getting Worn Down";
+        else if (ratio >= 40) status = "Bloodied";
+        else if (ratio >= 20) status = "Seriously Hurt";
+        else if (ratio > 0) status = "Grievously Wounded";
+        else status = "Unconscious or Dead";
+        
+        statusElement.innerText = "Injury Status: " + status;
+        tileElement.style.backgroundColor = getHealthColor(status);
+      }
+    </script>
+  </body>
+</html>
