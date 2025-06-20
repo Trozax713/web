@@ -23,6 +23,32 @@
             margin-bottom: 30px;
         }
 
+        /* Collapse button */
+        .collapse-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #4a6741, #5a7c50);
+            color: #e8f5e8;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 2px solid #7fb069;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-family: 'Georgia', serif;
+            width: auto;
+            min-width: unset;
+            z-index: 1000;
+        }
+
+        .collapse-button:hover {
+            background: linear-gradient(135deg, #5a7c50, #6a8c60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
         /* Master categories styling (Spell Levels) */
         .master-category {
             font-size: 28px;
@@ -167,6 +193,18 @@
                 margin-bottom: 20px;
             }
 
+            /* Collapse button mobile styling */
+            .collapse-button {
+                font-size: 14px;
+                padding: 4px 8px;
+                top: 5px;
+                left: 5px;
+            }
+
+            .collapse-button:hover {
+                transform: none;
+            }
+
             /* Compact master categories on mobile */
             .master-category {
                 font-size: 18px;
@@ -227,7 +265,8 @@
     </style>
 </head>
 <body>
-    <h1 class="title">🧙‍♂️ Spellbook 📜</h1>
+    <button id="collapseAll" class="collapse-button">Collapse</button>
+    <h1 class="title">Druid Spells</h1>
     
     <div id="categories"></div>
 
@@ -7005,8 +7044,31 @@
             });
         }
 
+        // Function to collapse all open sections
+        function collapseAll() {
+            // Get all containers in the categories div
+            const container = document.getElementById('categories');
+            const allDivs = container.querySelectorAll('div');
+            
+            allDivs.forEach(div => {
+                // Hide any div that doesn't have specific button/display classes
+                // This targets the level containers and spell detail containers
+                if (!div.classList.contains('master-category') && 
+                    !div.classList.contains('subcategory') && 
+                    !div.classList.contains('spell-details') &&
+                    !div.classList.contains('spell-field') &&
+                    !div.classList.contains('field-name') &&
+                    !div.classList.contains('field-value')) {
+                    div.classList.add('hidden');
+                }
+            });
+        }
+
         // Initialize the spellbook
         renderSpellbook();
+
+        // Add event listener for collapse button
+        document.getElementById('collapseAll').addEventListener('click', collapseAll);
     </script>
 </body>
 </html>
