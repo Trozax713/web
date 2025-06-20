@@ -156,14 +156,72 @@
 
         /* Responsive design */
         @media (max-width: 768px) {
+            /* Reduce body padding on mobile */
+            body {
+                padding: 15px;
+            }
+
+            /* Make title smaller on mobile */
+            h1.title {
+                font-size: 28px;
+                margin-bottom: 20px;
+            }
+
+            /* Compact master categories on mobile */
+            .master-category {
+                font-size: 18px;
+                padding: 8px 12px;
+                margin: 6px 0;
+                border-radius: 6px;
+            }
+
+            /* Compact subcategories on mobile */
+            .subcategory {
+                font-size: 16px;
+                padding: 6px 10px;
+                margin: 6px 0 0 10px;
+                width: calc(100% - 20px);
+                border-radius: 6px;
+            }
+
+            /* Adjust spell details positioning */
+            .spell-details {
+                margin: 4px 0 0 20px;
+                width: calc(100% - 30px);
+                border-radius: 6px;
+            }
+
+            /* Stack spell field elements vertically */
             .spell-field {
                 flex-direction: column;
             }
             
             .field-name {
                 width: 100%;
+                min-width: unset;
                 border-right: none;
                 border-bottom: 1px solid #7fb069;
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+
+            .field-value {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+
+            .field-value.description {
+                font-size: 12px;
+                max-height: 150px;
+            }
+
+            /* Disable hover transforms on mobile */
+            .master-category:hover {
+                transform: none;
+            }
+
+            .subcategory:hover {
+                transform: none;
             }
         }
     </style>
