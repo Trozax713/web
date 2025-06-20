@@ -85,11 +85,110 @@
             border-left: 4px solid #7fb069;
             transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .subcategory:hover {
             background: linear-gradient(135deg, #5f6570, #4a5158);
             transform: translateX(5px);
+        }
+
+        .subcategory.prepared {
+            border-left: 4px solid #90c695;
+            background: linear-gradient(135deg, #4a5a4f, #3a4a3f);
+        }
+
+        /* Checkbox styling */
+        .spell-checkbox {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: #7fb069;
+            flex-shrink: 0;
+        }
+
+        .spell-content {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* Prepared spells counter */
+        .prepared-counter {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #4a6741, #5a7c50);
+            color: #e8f5e8;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #7fb069;
+            font-family: 'Georgia', serif;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spell-limit-input {
+            width: 40px;
+            background: #2d3e2d;
+            border: 1px solid #7fb069;
+            color: #e8f5e8;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Clear button */
+        .clear-button {
+            font-size: 14px;
+            background: linear-gradient(135deg, #6b4741, #7c5750);
+            color: #e8f5e8;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 2px solid #b06969;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-family: 'Georgia', serif;
+            width: auto;
+            min-width: unset;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        .clear-button:hover {
+            background: linear-gradient(135deg, #7c5750, #8c6760);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        /* Prepared spells category */
+        .prepared-category {
+            font-size: 28px;
+            background: linear-gradient(135deg, #4a6741, #5a7c50);
+            color: #e8f5e8;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 10px 0 20px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border: 2px solid #90c695;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .prepared-category:hover {
+            background: linear-gradient(135deg, #5a7c50, #6a8c60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
         }
 
         /* Spell name styling */
@@ -200,6 +299,45 @@
                 margin: 6px 0 0 10px;
                 width: calc(100% - 20px);
                 border-radius: 6px;
+                gap: 5px;
+            }
+
+            .spell-checkbox {
+                width: 14px;
+                height: 14px;
+            }
+
+            .prepared-counter {
+                font-size: 12px;
+                padding: 4px 8px;
+                top: 5px;
+                right: 5px;
+                gap: 4px;
+            }
+
+            .spell-limit-input {
+                width: 30px;
+                font-size: 12px;
+            }
+
+            .clear-button {
+                font-size: 12px;
+                padding: 4px 8px;
+                margin: 0 auto 15px auto;
+            }
+
+            .clear-button:hover {
+                transform: none;
+            }
+
+            .prepared-category {
+                font-size: 16px;
+                padding: 6px 10px;
+                margin: 8px 0 12px 0;
+            }
+
+            .prepared-category:hover {
+                transform: none;
             }
 
             /* Adjust spell details positioning */
@@ -245,14 +383,20 @@
 </head>
 <body>
     <button id="collapseAll" class="collapse-button">Collapse</button>
+    <div id="preparedCounter" class="prepared-counter">
+        <span>Max:</span>
+        <input type="number" id="spellLimit" class="spell-limit-input" value="10" min="0" max="99">
+        <span id="preparedCount">0/10</span>
+    </div>
     <h1 class="title">Druid Spells</h1>
+    <button id="clearAll" class="clear-button">Clear All Prepared Spells</button>
     
     <div id="categories"></div>
 
     <script>
         // Sample JSON data structure - replace this with your converted JSON
         const jsonData = {
-    "Level 0  (Cantrips)": {
+    "Level 0": {
         "Control Flames - Transmutation cantrip - Druid (XGE)": [
             {
                 "group": "Casting TIme",
@@ -862,7 +1006,7 @@
             }
         ]
     },
-    "Level 1  (Druid Lvl 1+)": {
+    "Level 1": {
         "Absorb Elements - 1st level Abjuration - Druid (XGE)": [
             {
                 "group": "Casting TIme",
@@ -1632,7 +1776,7 @@
             }
         ]
     },
-    "Level 2  (Druid Lvl 3+)": {
+    "Level 2": {
         "Animal Messenger (ritual) - 2nd level Enchantment - Druid": [
             {
                 "group": "Casting TIme",
@@ -2914,7 +3058,7 @@
             }
         ]
     },
-    "Level 3  (Druid Lvl 5+)": {
+    "Level 3": {
         "Call Lightning - 3rd level Conjuration - Druid (*)(Forest)": [
             {
                 "group": "Casting TIme",
@@ -3908,7 +4052,7 @@
             }
         ]
     },
-    "Level 4  (Druid Lvl 7+)": {
+    "Level 4": {
         "Blight - 4th level Necromancy - Druid (*)(Desert)": [
             {
                 "group": "Casting TIme",
@@ -4838,7 +4982,7 @@
             }
         ]
     },
-    "Level 5  (Druid Lvl 9+)": {
+    "Level 5": {
         "Antilife Shell - 5th level Abjuration - Druid": [
             {
                 "group": "Casting TIme",
@@ -5736,7 +5880,7 @@
             }
         ]
     },
-    "Level 6  (Druid Lvl 11+)": {
+    "Level 6": {
         "Bones of the Earth - 6th level Transmutation - Druid (XGE)": [
             {
                 "group": "Casting TIme",
@@ -6282,7 +6426,7 @@
             }
         ]
     },
-    "Level 7  (Druid Lvl 13+)": {
+    "Level 7": {
         "Fire Storm - 7th level Evocation - Druid": [
             {
                 "group": "Casting TIme",
@@ -6540,7 +6684,7 @@
             }
         ]
     },
-    "Level 8  (Druid Lvl 15+)": {
+    "Level 8": {
         "Animal Shapes - 8th level Transmutation - Druid": [
             {
                 "group": "Casting TIme",
@@ -6798,7 +6942,7 @@
             }
         ]
     },
-    "Level 9  (Druid Lvl 20+)": {
+    "Level 9": {
         "Foresight - 9th level Divination - Druid": [
             {
                 "group": "Casting TIme",
@@ -6930,6 +7074,46 @@
     }
 };
 
+        // Track prepared spells and spell limit
+        let preparedSpells = new Set();
+        let spellLimit = 10;
+
+        // localStorage functions
+        function saveToLocalStorage() {
+            const data = {
+                preparedSpells: [...preparedSpells],
+                spellLimit: spellLimit
+            };
+            localStorage.setItem('druidSpells', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('druidSpells');
+            if (saved) {
+                const data = JSON.parse(saved);
+                preparedSpells = new Set(data.preparedSpells || []);
+                spellLimit = data.spellLimit || 10;
+                document.getElementById('spellLimit').value = spellLimit;
+            }
+        }
+
+        function clearLocalStorage() {
+            localStorage.removeItem('druidSpells');
+            preparedSpells.clear();
+            spellLimit = 10;
+            document.getElementById('spellLimit').value = spellLimit;
+            
+            // Uncheck all checkboxes and remove prepared styling
+            const checkboxes = document.querySelectorAll('.spell-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.closest('.subcategory').classList.remove('prepared');
+            });
+            
+            updatePreparedCounter();
+            updatePreparedCategory();
+        }
+
         // Function to create spell details
         function createSpellDetails(spellData) {
             let detailsHtml = '<div class="spell-details">';
@@ -6953,6 +7137,47 @@
         // Function to toggle visibility
         function toggleElement(element) {
             element.classList.toggle('hidden');
+        }
+
+        // Function to update prepared spells counter
+        function updatePreparedCounter() {
+            const counter = document.getElementById('preparedCount');
+            counter.textContent = `${preparedSpells.size}/${spellLimit}`;
+            
+            // Add visual feedback if at limit
+            if (preparedSpells.size >= spellLimit) {
+                counter.style.color = '#ff9999';
+            } else {
+                counter.style.color = '#e8f5e8';
+            }
+        }
+
+        // Function to handle spell preparation toggle
+        function toggleSpellPreparation(spellName, checkbox, spellElement) {
+            if (checkbox.checked) {
+                // Check if at spell limit
+                if (preparedSpells.size >= spellLimit) {
+                    checkbox.checked = false;
+                    alert(`You can only prepare ${spellLimit} spells. Increase your limit or unprepare other spells first.`);
+                    return;
+                }
+                preparedSpells.add(spellName);
+                spellElement.classList.add('prepared');
+            } else {
+                preparedSpells.delete(spellName);
+                spellElement.classList.remove('prepared');
+            }
+            updatePreparedCounter();
+            updatePreparedCategory();
+            saveToLocalStorage();
+        }
+
+        // Function to update spell limit
+        function updateSpellLimit() {
+            const limitInput = document.getElementById('spellLimit');
+            spellLimit = parseInt(limitInput.value) || 0;
+            updatePreparedCounter();
+            saveToLocalStorage();
         }
 
         // Function to render the spellbook
@@ -6985,6 +7210,16 @@
                     const spellElement = document.createElement('div');
                     spellElement.classList.add('subcategory');
                     
+                    // Create checkbox for spell preparation
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.classList.add('spell-checkbox');
+                    checkbox.id = `spell-${spellName.replace(/\s+/g, '-')}`;
+                    
+                    // Create content container
+                    const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('spell-content');
+                    
                     // Parse the spell name to separate the actual name from school and source
                     const parts = spellName.split(' - ');
                     if (parts.length >= 2) {
@@ -6992,11 +7227,15 @@
                         const actualSpellName = parts[0];
                         const schoolAndSource = parts.slice(1).join(' - ');
                         
-                        spellElement.innerHTML = `<span class="spell-name">${actualSpellName}</span> - <span class="spell-details-text">${schoolAndSource}</span>`;
+                        contentDiv.innerHTML = `<span class="spell-name">${actualSpellName}</span> - <span class="spell-details-text">${schoolAndSource}</span>`;
                     } else {
                         // Fallback if no dashes found
-                        spellElement.innerHTML = `<span class="spell-name">${spellName}</span>`;
+                        contentDiv.innerHTML = `<span class="spell-name">${spellName}</span>`;
                     }
+                    
+                    // Add checkbox and content to spell element
+                    spellElement.appendChild(checkbox);
+                    spellElement.appendChild(contentDiv);
                     
                     levelContainer.appendChild(spellElement);
 
@@ -7008,10 +7247,23 @@
 
                     levelContainer.appendChild(spellContainer);
 
-                    // Toggle spell details on click
-                    spellElement.addEventListener('click', function() {
+                    // Toggle spell details on content click (not checkbox)
+                    contentDiv.addEventListener('click', function(e) {
+                        e.stopPropagation();
                         toggleElement(spellContainer);
                     });
+
+                    // Handle spell preparation checkbox
+                    checkbox.addEventListener('change', function(e) {
+                        e.stopPropagation();
+                        toggleSpellPreparation(spellName, checkbox, spellElement);
+                    });
+                    
+                    // Set checkbox state if spell is already prepared (from localStorage)
+                    if (preparedSpells.has(spellName)) {
+                        checkbox.checked = true;
+                        spellElement.classList.add('prepared');
+                    }
                 });
 
                 container.appendChild(levelContainer);
@@ -7023,7 +7275,91 @@
             });
         }
 
-        // Function to collapse all open sections
+        // Function to update the prepared spells category
+        function updatePreparedCategory() {
+            const container = document.getElementById('categories');
+            let preparedCategory = document.getElementById('preparedCategory');
+            let preparedContainer = document.getElementById('preparedContainer');
+            
+            // Remove existing prepared category if it exists
+            if (preparedCategory) {
+                preparedCategory.remove();
+            }
+            if (preparedContainer) {
+                preparedContainer.remove();
+            }
+            
+            // Only create prepared category if there are prepared spells
+            if (preparedSpells.size === 0) {
+                return;
+            }
+            
+            // Create prepared category header
+            preparedCategory = document.createElement('div');
+            preparedCategory.classList.add('prepared-category');
+            preparedCategory.id = 'preparedCategory';
+            preparedCategory.textContent = `⭐ Prepared Spells (${preparedSpells.size})`;
+            container.insertBefore(preparedCategory, container.firstChild);
+            
+            // Create prepared container
+            preparedContainer = document.createElement('div');
+            preparedContainer.classList.add('hidden');
+            preparedContainer.id = 'preparedContainer';
+            
+            // Add prepared spells to the container
+            preparedSpells.forEach(spellName => {
+                const spellData = findSpellData(spellName);
+                if (spellData) {
+                    // Create spell element (similar to regular spell display)
+                    const spellElement = document.createElement('div');
+                    spellElement.classList.add('subcategory', 'prepared');
+                    
+                    // Parse the spell name
+                    const parts = spellName.split(' - ');
+                    if (parts.length >= 2) {
+                        const actualSpellName = parts[0];
+                        const schoolAndSource = parts.slice(1).join(' - ');
+                        spellElement.innerHTML = `<span class="spell-name">${actualSpellName}</span> - <span class="spell-details-text">${schoolAndSource}</span>`;
+                    } else {
+                        spellElement.innerHTML = `<span class="spell-name">${spellName}</span>`;
+                    }
+                    
+                    preparedContainer.appendChild(spellElement);
+                    
+                    // Add spell details
+                    const spellDetails = createSpellDetails(spellData.data);
+                    const spellDetailContainer = document.createElement('div');
+                    spellDetailContainer.classList.add('hidden');
+                    spellDetailContainer.innerHTML = spellDetails;
+                    preparedContainer.appendChild(spellDetailContainer);
+                    
+                    // Toggle spell details on click
+                    spellElement.addEventListener('click', function() {
+                        toggleElement(spellDetailContainer);
+                    });
+                }
+            });
+            
+            container.insertBefore(preparedContainer, container.children[1]);
+            
+            // Toggle prepared category on click
+            preparedCategory.addEventListener('click', function() {
+                toggleElement(preparedContainer);
+            });
+        }
+
+        // Helper function to find spell data by name
+        function findSpellData(spellName) {
+            for (const level in jsonData) {
+                if (jsonData[level][spellName]) {
+                    return {
+                        level: level,
+                        data: jsonData[level][spellName]
+                    };
+                }
+            }
+            return null;
+        }
         function collapseAll() {
             // Get all containers in the categories div
             const container = document.getElementById('categories');
@@ -7044,10 +7380,20 @@
         }
 
         // Initialize the spellbook
+        loadFromLocalStorage();
         renderSpellbook();
+        updatePreparedCounter();
+        updatePreparedCategory();
 
-        // Add event listener for collapse button
+        // Add event listeners
         document.getElementById('collapseAll').addEventListener('click', collapseAll);
+        document.getElementById('clearAll').addEventListener('click', function() {
+            if (confirm('Clear all prepared spells? This cannot be undone.')) {
+                clearLocalStorage();
+            }
+        });
+        document.getElementById('spellLimit').addEventListener('change', updateSpellLimit);
+        document.getElementById('spellLimit').addEventListener('input', updateSpellLimit);
     </script>
 </body>
 </html>
