@@ -7078,27 +7078,27 @@
         let preparedSpells = new Set();
         let spellLimit = 10;
 
-        // localStorage functions
-        function saveToLocalStorage() {
-            const data = {
+        // In-memory storage functions (replacing localStorage for Claude.ai compatibility)
+        let savedData = {
+            preparedSpells: [],
+            spellLimit: 10
+        };
+
+        function saveToStorage() {
+            savedData = {
                 preparedSpells: [...preparedSpells],
                 spellLimit: spellLimit
             };
-            localStorage.setItem('druidSpells', JSON.stringify(data));
         }
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('druidSpells');
-            if (saved) {
-                const data = JSON.parse(saved);
-                preparedSpells = new Set(data.preparedSpells || []);
-                spellLimit = data.spellLimit || 10;
-                document.getElementById('spellLimit').value = spellLimit;
-            }
+        function loadFromStorage() {
+            preparedSpells = new Set(savedData.preparedSpells || []);
+            spellLimit = savedData.spellLimit || 10;
+            document.getElementById('spellLimit').value = spellLimit;
         }
 
-        function clearLocalStorage() {
-            localStorage.removeItem('druidSpells');
+        function clearStorage() {
+            savedData = { preparedSpells: [], spellLimit: 10 };
             preparedSpells.clear();
             spellLimit = 10;
             document.getElementById('spellLimit').value = spellLimit;
@@ -7169,7 +7169,7 @@
             }
             updatePreparedCounter();
             updatePreparedCategory();
-            saveToLocalStorage();
+            saveToStorage();
         }
 
         // Function to update spell limit
@@ -7177,7 +7177,7 @@
             const limitInput = document.getElementById('spellLimit');
             spellLimit = parseInt(limitInput.value) || 0;
             updatePreparedCounter();
-            saveToLocalStorage();
+            saveToStorage();
         }
 
         // Function to render the spellbook
@@ -7259,7 +7259,7 @@
                         toggleSpellPreparation(spellName, checkbox, spellElement);
                     });
                     
-                    // Set checkbox state if spell is already prepared (from localStorage)
+                    // Set checkbox state if spell is already prepared (from storage)
                     if (preparedSpells.has(spellName)) {
                         checkbox.checked = true;
                         spellElement.classList.add('prepared');
@@ -7360,27 +7360,29 @@
             }
             return null;
         }
+
+        // Fixed collapseAll function
         function collapseAll() {
-            // Get all containers in the categories div
             const container = document.getElementById('categories');
-            const allDivs = container.querySelectorAll('div');
             
-            allDivs.forEach(div => {
-                // Hide any div that doesn't have specific button/display classes
-                // This targets the level containers and spell detail containers
-                if (!div.classList.contains('master-category') && 
-                    !div.classList.contains('subcategory') && 
-                    !div.classList.contains('spell-details') &&
-                    !div.classList.contains('spell-field') &&
-                    !div.classList.contains('field-name') &&
-                    !div.classList.contains('field-value')) {
-                    div.classList.add('hidden');
+            // Hide the prepared container if it exists
+            const preparedContainer = document.getElementById('preparedContainer');
+            if (preparedContainer) {
+                preparedContainer.classList.add('hidden');
+            }
+            
+            // Hide all level containers and spell detail containers
+            // These are the direct children that don't have master-category or prepared-category classes
+            Array.from(container.children).forEach(child => {
+                if (!child.classList.contains('master-category') && 
+                    !child.classList.contains('prepared-category')) {
+                    child.classList.add('hidden');
                 }
             });
         }
 
         // Initialize the spellbook
-        loadFromLocalStorage();
+        loadFromStorage();
         renderSpellbook();
         updatePreparedCounter();
         updatePreparedCategory();
@@ -7389,7 +7391,7 @@
         document.getElementById('collapseAll').addEventListener('click', collapseAll);
         document.getElementById('clearAll').addEventListener('click', function() {
             if (confirm('Clear all prepared spells? This cannot be undone.')) {
-                clearLocalStorage();
+                clearStorage();
             }
         });
         document.getElementById('spellLimit').addEventListener('change', updateSpellLimit);
