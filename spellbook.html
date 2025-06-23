@@ -7371,12 +7371,21 @@
                 preparedContainer.classList.add('hidden');
             }
             
-            // Hide all level containers and spell detail containers
-            // These are the direct children that don't have master-category or prepared-category classes
+            // Hide all level containers (spell level categories)
             Array.from(container.children).forEach(child => {
                 if (!child.classList.contains('master-category') && 
                     !child.classList.contains('prepared-category')) {
                     child.classList.add('hidden');
+                }
+            });
+            
+            // Also hide all individual spell detail containers that might be open
+            const allSpellDetails = container.querySelectorAll('.spell-details');
+            allSpellDetails.forEach(detailContainer => {
+                // Find the parent container of the spell details and hide it
+                const parentContainer = detailContainer.parentElement;
+                if (parentContainer && !parentContainer.classList.contains('hidden')) {
+                    parentContainer.classList.add('hidden');
                 }
             });
         }
